@@ -194,10 +194,48 @@ class Link(WordPressModel):
         return self.visible == 'Y'
 
 
+def _split_ids(meta_value):
+    if meta_value:
+        return [
+            int(bits.split(':')[-1][1:-1])
+            for bits in meta_value.split('{')[1].split(';')[1::2]
+        ]
+    return list()
+
+
+def find_first(predicate, iterable):
+    for val in iterable:
+        if predicate(val):
+            return val
+    return None
+
+
+class WordpressQuerySet(models.QuerySet):
+
+    def prefetch_related_meta(self, *args):
+        qs = self.prefetch_related('meta')
+        shared_cache = {}
+
+        for meta_name in args:
+            related_post_ids = set()
+            for post in qs:
+                meta = find_first(lambda o: o.key == meta_name, post.meta.all())
+                if meta and meta.value:
+                    related_post_ids = related_post_ids.union(set(_split_ids(meta.value)))
+            related_posts = Post.objects.filter(id__in=related_post_ids).prefetch_related('meta')
+            shared_cache[meta_name] = {post.id: post for post in related_posts}
+        for p in qs:
+            p._related_meta_cache = shared_cache
+            yield p
+
+
+
 class PostManager(WordPressManager):
     """
     Provides convenience methods for filtering posts by status.
     """
+    def get_queryset(self):
+        return WordpressQuerySet(self.model, using=self._db)
 
     def _by_status(self, status, post_type='post'):
         return self.filter(status=status, post_type=post_type)\
@@ -394,6 +432,27 @@ class Post(WordPressModel):
 
     def tags(self):
         return self._get_terms("post_tag")
+
+    def related_instances(self, meta_name):
+        """
+        """
+        related_post_ids = set(_split_ids(self._get_meta('speaker')))
+        in_cache = list()
+        if hasattr(self, '_related_meta_cache') and meta_name in self._related_meta_cache:
+            cache = self._related_meta_cache[meta_name]
+            in_cache = [cache[post_id] for post_id in related_post_ids if post_id in cache]
+        if in_cache:
+            related_post_ids = related_post_ids.difference(set([s.id for s in in_cache]))
+        related_instances = in_cache
+        if related_post_ids:
+            related_instances += list(Post.objects.filter(id__in=related_post_ids).prefetch_related('meta'))
+        return related_instances
+
+    def _get_meta(self, name):
+        for x in self.meta.all():
+            if x.key == name:
+                return x.value
+        return None
 
 
 class PostMeta(WordPressModel):
