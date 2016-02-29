@@ -213,7 +213,7 @@ def find_first(predicate, iterable):
 class WordpressQuerySet(models.QuerySet):
 
     def prefetch_related_meta(self, *args):
-        qs = self.prefetch_related('meta', 'translation')
+        qs = self.prefetch_related('meta', 'translation_set')
         shared_cache = {}
 
         for meta_name in args:
@@ -222,7 +222,7 @@ class WordpressQuerySet(models.QuerySet):
                 meta = find_first(lambda o: o.key == meta_name, post.meta.all())
                 if meta and meta.value:
                     related_post_ids = related_post_ids.union(set(_split_ids(meta.value)))
-            related_posts = Post.objects.filter(id__in=related_post_ids).prefetch_related('meta', 'translation')
+            related_posts = Post.objects.filter(id__in=related_post_ids).prefetch_related('meta', 'translation_set')
             shared_cache[meta_name] = {post.id: post for post in related_posts}
         for p in qs:
             p._related_meta_cache = shared_cache
@@ -577,12 +577,12 @@ class Taxonomy(WordPressModel):
 class Translation(WordPressModel):
     id = models.IntegerField(db_column="translation_id", primary_key=True)
     element_type = models.CharField(max_length=36)
-    element = models.OneToOneField(Post, blank=True, null=True)
+    element = models.ForeignKey(Post, blank=True, null=True)
     trid = models.IntegerField()
     language_code = models.CharField(max_length=7)
     source_language_code = models.CharField(max_length=7, blank=True, null=True)
 
     class Meta:
         db_table = '%s_icl_translations' % TABLE_PREFIX
-        ordering = ['id']
+        ordering = ['id', ]
         managed = False
