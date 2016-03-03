@@ -436,7 +436,7 @@ class Post(WordPressModel):
     def related_instances(self, meta_name):
         """
         """
-        related_post_ids = set(_split_ids(self._get_meta('speaker')))
+        related_post_ids = set(_split_ids(self._get_meta(meta_name)))
         in_cache = list()
         if hasattr(self, '_related_meta_cache') and meta_name in self._related_meta_cache:
             cache = self._related_meta_cache[meta_name]
