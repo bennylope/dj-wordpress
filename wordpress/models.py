@@ -213,7 +213,7 @@ def find_first(predicate, iterable):
 class WordpressQuerySet(models.QuerySet):
 
     def prefetch_related_meta(self, *args):
-        qs = self.prefetch_related('meta', 'translation_set')
+        qs = self.prefetch_related('meta', 'translation_set', 'terms', 'terms__term')
         shared_cache = {}
 
         for meta_name in args:
