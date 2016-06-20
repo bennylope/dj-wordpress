@@ -3,14 +3,17 @@ import wordpress
 
 long_description = open('README.rst').read()
 
+
 setup(
-    name='the-real-django-wordpress',
+    name='dj-wordpress',
     version=wordpress.__version__,
     description='Django models and views for a WordPress database.',
     long_description=long_description,
     author='Jeremy Carbaugh',
     author_email='jcarbaugh@sunlightfoundation.com',
-    url='http://github.com/sunlightlabs/django-wordpress/',
+    maintainer='Ben Lopatin',
+    maintainer_email='ben@benlopatin.com',
+    url='http://github.com/bennylope/dj-wordpress/',
     packages=['wordpress'],
     package_data={'wordpress': ['templates/wordpress/*']},
     classifiers=[
