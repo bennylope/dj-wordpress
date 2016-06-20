@@ -5,16 +5,19 @@ from wordpress.models import (
 )
 
 
+@admin.register(Option)
 class OptionAdmin(admin.ModelAdmin):
     list_display = ('name', 'value')
 
 
+@admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'post', 'author_name', 'post_date')
     list_filter = ('comment_type', 'approved')
     search_fields = ('author_name', 'author_email', 'post__title')
 
 
+@admin.register(Link)
 class LinkAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'url', 'description')
     list_filter = ('visible',)
@@ -25,6 +28,7 @@ class PostMetaInline(admin.TabularInline):
     model = PostMeta
 
 
+@admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     inlines = (PostMetaInline,)
     list_display = ('id', 'title', 'author', 'post_date')
@@ -36,6 +40,7 @@ class UserMetaInline(admin.TabularInline):
     model = UserMeta
 
 
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     inlines = (UserMetaInline,)
     list_display = ('id', 'display_name', 'email', 'status')
@@ -43,20 +48,13 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('login', 'username', 'display_name', 'email')
 
 
+@admin.register(Taxonomy)
 class TaxonomyAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'term')
     list_filter = ('name',)
 
 
+@admin.register(Term)
 class TermAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     search_fields = ('name',)
-
-
-admin.site.register(Option, OptionAdmin)
-admin.site.register(Comment, CommentAdmin)
-admin.site.register(Link, LinkAdmin)
-admin.site.register(Post, PostAdmin)
-admin.site.register(Taxonomy, TaxonomyAdmin)
-admin.site.register(Term, TermAdmin)
-admin.site.register(User, UserAdmin)
