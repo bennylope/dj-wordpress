@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
+from .exceptions import WordPressException
+
 
 STATUS_CHOICES = (
     ('closed', 'closed'),
@@ -31,17 +33,6 @@ USER_STATUS_CHOICES = (
 
 READ_ONLY = getattr(settings, "WP_READ_ONLY", True)
 TABLE_PREFIX = getattr(settings, "WP_TABLE_PREFIX", "wp")
-
-
-#
-# Exceptions
-#
-
-class WordPressException(Exception):
-    """
-    Exception that is thrown when attempting to save a read-only object.
-    """
-    pass
 
 
 #
