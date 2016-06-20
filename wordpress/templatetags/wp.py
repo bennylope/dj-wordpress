@@ -1,7 +1,9 @@
+import re
+
 from django import template
 from django.template import Context
+
 from wordpress.models import Post
-import re
 
 register = template.Library()
 
@@ -54,19 +56,3 @@ def _posts(parser, token, queryset):
 def do_recent_posts(parser, token):
     qs = Post.objects.published()
     return _posts(parser, token, qs)
-
-
-# popular tags
-"""
-SELECT COUNT(1) as cnt, t.name, t.slug
-FROM sf_terms t
-JOIN sf_term_taxonomy tt ON t.term_id = tt.term_id
-JOIN sf_term_relationships tr ON tt.term_taxonomy_id = tr.term_taxonomy_id
-JOIN sf_posts p ON tr.object_id = p.id
-WHERE p.post_status = 'publish'
-    AND p.post_type = 'post'
-    AND t.slug <> 'uncategorized'
-GROUP BY t.name, t.slug
-ORDER BY cnt DESC
-LIMIT 10
-"""
