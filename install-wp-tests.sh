@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Borrowed from wp-cli plugin testing example
+
 if [ $# -lt 3 ]; then
 	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version]"
 	exit 1
@@ -58,34 +60,6 @@ install_wp() {
 	download https://raw.github.com/markoheijnen/wp-mysqli/master/db.php $WP_CORE_DIR/wp-content/db.php
 }
 
-install_test_suite() {
-	# portable in-place argument for both GNU sed and Mac OSX sed
-	if [[ $(uname -s) == 'Darwin' ]]; then
-		local ioption='-i .bak'
-	else
-		local ioption='-i'
-	fi
-
-	# set up testing suite if it doesn't yet exist
-	if [ ! -d $WP_TESTS_DIR ]; then
-		# set up testing suite
-		mkdir -p $WP_TESTS_DIR
-		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
-	fi
-
-	cd $WP_TESTS_DIR
-
-	if [ ! -f wp-tests-config.php ]; then
-		download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR':" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
-		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
-	fi
-
-}
-
 install_db() {
 	# parse DB_HOST for port or socket references
 	local PARTS=(${DB_HOST//\:/ })
@@ -108,5 +82,4 @@ install_db() {
 }
 
 install_wp
-# install_test_suite
 install_db
